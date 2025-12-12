@@ -1,0 +1,10 @@
+nama email rafilexsmana@gmail.com
+
+password: 12345678
+
+cara memakainya pertama"
+
+npm install
+
+npm run dev
+

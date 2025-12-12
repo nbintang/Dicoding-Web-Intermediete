@@ -1,0 +1,11 @@
+Untuk menjalankan server, buka terminal di folder project Anda. 
+Pertama, jalankan perintah npm install untuk menginstal semua dependensi yang dibutuhkan, 
+lalu ketik npm run dev untuk memulai server. Setelah proses selesai
+server akan aktif dan bisa diakses melalui browser di alamat http://localhost:5173/.
+
+Untuk menghentikan server, kembali ke terminal tempat server dijalankan biasanya terlihat log VITE v6.x.x ready. 
+
+Tekan CTRL + C pada keyboard. Jika menggunakan PowerShell, akan muncul pertanyaan Terminate batch job (Y/N)?, 
+
+ketik Y lalu tekan Enter Setelah itu, server berhenti dan terminal siap digunakan kembali 
+untuk perintah lainnya.
