@@ -1,138 +1,147 @@
-const CACHE_NAME = "story-cache-v2";
+const CACHE_NAME = "story-app-v3"; // Bump version biar cache lama terhapus
 const API_CACHE = "story-api-cache-v1";
+const IMAGE_CACHE = "story-image-cache-v1";
 
-// App Shell - semua assets yang dibutuhkan untuk offline
 const APP_SHELL = [
-  "/",
-  "/index.html",
-  "/styles/styles.css",
-  "/scripts/main.js",
-  "/scripts/router.js",
-  "/scripts/api/model.js",
-  "/scripts/api/db.js",
-  "/scripts/components/auth.js",
-  "/scripts/components/camera.js",
-  "/scripts/components/dom.js",
-  "/scripts/components/map.js",
-  "/scripts/components/view-transition.js",
-  "/scripts/controllers/authController.js",
-  "/scripts/controllers/storyController.js",
-  "/scripts/views/AppShellView.js",
-  "/scripts/views/LoginView.js",
-  "/scripts/views/RegisterView.js",
-  "/scripts/views/StoriesView.js",
-  "/scripts/views/AddStoryView.js",
-  "/scripts/views/NotFoundView.js",
-  "/public/favicon.png",
+  "./",
+  "./index.html",
+  "./styles/styles.css",
+  "./scripts/main.js",
+  "./scripts/router.js",
+  "./scripts/api/model.js",
+  "./scripts/api/db.js",
+  "./scripts/components/auth.js",
+  "./scripts/components/camera.js",
+  "./scripts/components/dom.js",
+  "./scripts/components/map.js",
+  "./scripts/components/view-transition.js",
+  "./scripts/controllers/authController.js",
+  "./scripts/controllers/storyController.js",
+  "./scripts/views/AppShellView.js",
+  "./scripts/views/LoginView.js",
+  "./scripts/views/RegisterView.js",
+  "./scripts/views/StoriesView.js",
+  "./scripts/views/AddStoryView.js",
+  "./scripts/views/SavedView.js",
+  "./scripts/views/NotFoundView.js",
+  "./public/favicon.png",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
 ];
 
-// Install - cache app shell
 self.addEventListener("install", (event) => {
-  console.log("[SW] Installing service worker...");
+  console.log("[SW] Installing...");
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log("[SW] Caching app shell");
-      return cache.addAll(APP_SHELL).catch((err) => {
-        console.error("[SW] Failed to cache some resources:", err);
-        // Don't fail completely if some resources fail
-        return Promise.resolve();
-      });
-    }).then(() => {
-      console.log("[SW] App shell cached successfully");
-      return self.skipWaiting();
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
   );
+  self.skipWaiting();
 });
 
-// Activate - cleanup old caches
 self.addEventListener("activate", (event) => {
-  console.log("[SW] Activating service worker...");
+  console.log("[SW] Activating...");
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME && cacheName !== API_CACHE) {
+          if (
+            cacheName !== CACHE_NAME &&
+            cacheName !== API_CACHE &&
+            cacheName !== IMAGE_CACHE
+          ) {
             console.log("[SW] Deleting old cache:", cacheName);
             return caches.delete(cacheName);
           }
         })
       );
-    }).then(() => {
-      console.log("[SW] Service worker activated");
-      return self.clients.claim();
     })
   );
+  self.clients.claim();
 });
 
-// Fetch - strategy: Cache-First untuk static, Network-First untuk API
 self.addEventListener("fetch", (event) => {
-  const { request } = event;
+  const request = event.request;
   const url = new URL(request.url);
 
-  // API requests - Network First dengan fallback ke cache
-  if (url.origin.includes("dicoding.dev")) {
+  // 1. STRATEGI KHUSUS GAMBAR (Stale-While-Revalidate)
+  // Menangkap semua request gambar ke Dicoding API
+  if (
+    url.origin.includes("dicoding.dev") &&
+    (request.destination === "image" ||
+      url.pathname.match(/\.(jpg|jpeg|png|gif|webp)$/i))
+  ) {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          // Clone response untuk cache
-          const responseClone = response.clone();
-          caches.open(API_CACHE).then((cache) => {
-            cache.put(request, responseClone);
+      caches.open(IMAGE_CACHE).then(async (cache) => {
+        // Cek apakah ada di cache?
+        const cachedResponse = await cache.match(request);
+
+        // Fetch ke network untuk update cache (background)
+        const networkFetch = fetch(request, { mode: "no-cors" }) // Force no-cors untuk gambar opaque
+          .then((networkResponse) => {
+            // Simpan ke cache (baik sukses maupun opaque/status 0)
+            cache.put(request, networkResponse.clone());
+            return networkResponse;
+          })
+          .catch((err) => {
+            // Offline dan fetch gagal
+            console.log("[SW] Image fetch failed (offline):", url.pathname);
+            return null;
           });
-          return response;
-        })
-        .catch(() => {
-          // Fallback ke cache jika offline
-          return caches.match(request).then((cached) => {
-            if (cached) {
-              console.log("[SW] Serving from API cache:", request.url);
-              return cached;
-            }
-            // Return offline page atau error response
-            return new Response(
-              JSON.stringify({ error: "Offline, no cached data" }),
-              {
-                status: 503,
-                headers: { "Content-Type": "application/json" }
-              }
-            );
-          });
-        })
+
+        // Kembalikan cache jika ada, jika tidak tunggu network
+        return cachedResponse || networkFetch;
+      })
     );
     return;
   }
 
-  // Static assets - Cache First dengan fallback ke network
-  event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) {
-        return cached;
-      }
-
-      return fetch(request).then((response) => {
-        // Cache successful responses
-        if (response.status === 200) {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
+  if (
+    url.origin.includes("dicoding.dev") &&
+    (request.destination === "image" ||
+      url.pathname.match(/\.(jpg|jpeg|png|gif|webp)$/i))
+  ) {
+    event.respondWith(
+      caches.open(IMAGE_CACHE).then(async (cache) => {
+        const cachedResponse = await cache.match(request);
+        // Fetch network dan cache bila berhasil atau opaque
+        const networkFetch = fetch(request)
+          .then((networkResponse) => {
+            if (!networkResponse) return null;
+            // cache only if ok or opaque
+            if (networkResponse.ok || networkResponse.type === "opaque") {
+              cache
+                .put(request, networkResponse.clone())
+                .catch((err) => console.warn("[SW] cache.put failed", err));
+            }
+            return networkResponse;
+          })
+          .catch((err) => {
+            console.log(
+              "[SW] Image fetch failed (offline):",
+              url.pathname,
+              err
+            );
+            return null;
           });
-        }
-        return response;
-      }).catch((err) => {
-        console.error("[SW] Fetch failed:", request.url, err);
-        // Jika request gagal dan tidak ada di cache, return error
-        return new Response("Offline", { status: 503 });
-      });
+
+        // Kembalikan cached jika ada, kalau tidak tunggu networkFetch, kalau tidak ada fallback local
+        return (
+          cachedResponse ||
+          networkFetch ||
+          caches.match("/public/fallback-image.png")
+        );
+      })
+    );
+    return;
+  }
+  // 3. STRATEGI DEFAULT (Cache First untuk App Shell)
+  event.respondWith(
+    caches.match(request).then((response) => {
+      return response || fetch(request);
     })
   );
 });
-
-// Push Notification Handler
+// Push Notification Handler (Tetap sama)
 self.addEventListener("push", (event) => {
-  console.log("[SW] Push notification received");
-
   let notificationData = {
     title: "StoryBoard",
     body: "Ada update baru!",
@@ -140,7 +149,6 @@ self.addEventListener("push", (event) => {
     badge: "/public/favicon.png",
   };
 
-  // Parse data jika ada
   if (event.data) {
     try {
       const data = event.data.json();
@@ -156,16 +164,12 @@ self.addEventListener("push", (event) => {
       icon: notificationData.icon,
       badge: notificationData.badge,
       vibrate: [200, 100, 200],
+      data: { url: notificationData.url || "/" }, // Simpan URL
     })
   );
 });
 
-// Notification Click Handler
 self.addEventListener("notificationclick", (event) => {
-  console.log("[SW] Notification clicked");
   event.notification.close();
-
-  event.waitUntil(
-    clients.openWindow("/")
-  );
+  event.waitUntil(clients.openWindow(event.notification.data.url || "/"));
 });

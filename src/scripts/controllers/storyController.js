@@ -1,4 +1,5 @@
 import { getToken } from "../components/auth.js";
+import { storyDB } from "../api/db.js";
 
 export class StoryController {
   constructor(model, view) {
@@ -10,6 +11,7 @@ export class StoryController {
     this.view?.showLoading?.("Sedang mengambil daftar cerita...");
 
     try {
+      // Coba fetch dari API
       const response = await this.model.getStories({
         page: 1,
         size: 20,
@@ -18,15 +20,40 @@ export class StoryController {
 
       const stories = response?.listStory || [];
 
-      if (!stories.length) {
+      if (stories.length > 0) {
+        // Simpan ke IndexedDB untuk offline
+        await storyDB.putStories(stories);
+        this.view?.renderStories?.(stories);
+      } else {
         this.view?.renderError?.("Belum ada cerita yang tersedia.");
-        return;
       }
-
-      this.view?.renderStories?.(stories);
     } catch (err) {
-      console.error("[StoryController] Gagal memuat stories:", err);
-      this.view?.renderError?.("Gagal memuat daftar cerita.");
+      console.warn("[StoryController] Gagal fetch dari API, coba dari cache:", err);
+      
+      // Fallback ke IndexedDB jika offline
+      try {
+        const cachedStories = await storyDB.getAllStories();
+        
+        if (cachedStories && cachedStories.length > 0) {
+          console.info("[StoryController] Menampilkan data dari cache");
+          this.view?.renderStories?.(cachedStories);
+          
+          // Tampilkan info bahwa ini data offline
+          const main = document.querySelector("#main");
+          if (main) {
+            const offlineNotice = document.createElement("div");
+            offlineNotice.className = "offline-notice";
+            offlineNotice.innerHTML = "📡 Mode Offline - Menampilkan data tersimpan";
+            offlineNotice.style.cssText = "background:#fef3c7;padding:1rem;margin:1rem;border-radius:0.5rem;text-align:center;color:#92400e;font-weight:500;";
+            main.insertBefore(offlineNotice, main.firstChild);
+          }
+        } else {
+          this.view?.renderError?.("Tidak ada data tersimpan. Hubungkan ke internet untuk memuat cerita.");
+        }
+      } catch (dbErr) {
+        console.error("[StoryController] Error mengakses IndexedDB:", dbErr);
+        this.view?.renderError?.("Gagal memuat data. Periksa koneksi internet Anda.");
+      }
     } finally {
       this.view?.hideLoading?.();
     }
@@ -41,15 +68,45 @@ export class StoryController {
     this.view?.showLoading?.("Sedang memuat detail cerita...");
 
     try {
+      // Coba fetch dari API
       const result = await this.model.getDetail(storyId);
       const story = result?.story;
 
       if (!story) throw new Error("Detail tidak ditemukan.");
 
+      // Simpan ke IndexedDB
+      await storyDB.putStory(story);
       this.view?.renderDetail?.(story);
     } catch (err) {
-      console.error("[StoryController] Gagal memuat detail:", err);
-      this.view?.renderError?.("Gagal memuat detail cerita.");
+      console.warn("[StoryController] Gagal fetch detail dari API, coba dari cache:", err);
+      
+      // Fallback ke IndexedDB
+      try {
+        const cachedStory = await storyDB.getStory(storyId);
+        
+        if (cachedStory) {
+          console.info("[StoryController] Menampilkan detail dari cache");
+          this.view?.renderDetail?.(cachedStory);
+          
+          // Tampilkan info offline di detail
+          const main = document.querySelector("#main");
+          if (main) {
+            const offlineNotice = document.createElement("div");
+            offlineNotice.className = "offline-notice";
+            offlineNotice.innerHTML = "📡 Mode Offline";
+            offlineNotice.style.cssText = "background:#fef3c7;padding:0.75rem;margin-bottom:1rem;border-radius:0.5rem;text-align:center;color:#92400e;font-weight:500;";
+            const cardContent = main.querySelector(".card .content");
+            if (cardContent) {
+              cardContent.insertBefore(offlineNotice, cardContent.firstChild);
+            }
+          }
+        } else {
+          this.view?.renderError?.("Detail cerita tidak tersedia offline.");
+        }
+      } catch (dbErr) {
+        console.error("[StoryController] Error mengakses IndexedDB:", dbErr);
+        this.view?.renderError?.("Gagal memuat detail cerita.");
+      }
     } finally {
       this.view?.hideLoading?.();
     }
@@ -63,6 +120,12 @@ export class StoryController {
 
     if (!(file instanceof File) && !(file instanceof Blob)) {
       this.view?.renderError?.("File tidak valid atau rusak.");
+      return;
+    }
+
+    // Cek koneksi internet
+    if (!navigator.onLine) {
+      this.view?.renderError?.("Tidak dapat menambah cerita saat offline. Hubungkan ke internet terlebih dahulu.");
       return;
     }
 

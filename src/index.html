@@ -1,56 +1,51 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>StoryBoard - SPA</title>
-  <meta name="map-tiler-key" content="" />
-  <meta name="description" content="Aplikasi Story SPA" />
-  <meta name="theme-color" content="#6366f1" />
-  <link rel="manifest" href="/public/manifest.webmanifest" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>StoryBoard - SPA</title>
+  <meta name="map-tiler-key" content="" />
+  <meta name="description" content="Aplikasi Story SPA" />
+  <meta name="theme-color" content="#6366f1" />
+  <link rel="manifest" href="/public/manifest.webmanifest" />
 
-  <link rel="stylesheet" href="/styles/styles.css" />
-  <link rel="icon" href="/public/favicon.png" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/styles/styles.css" />
+  <link rel="icon" href="/public/favicon.png" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 
 <body>
-  <!-- Skip link -->
-  <a class="skip-link" href="#main">Lewati ke konten utama</a>
+    <a class="skip-link" href="#main">Lewati ke konten utama</a>
 
-  <!-- Header -->
-  <header id="app-header" role="banner">
-    <div class="logo-area">
-      <img 
-        src="/public/favicon.png" 
-        alt="Logo StoryBoard"
-        width="40" 
-        height="40" 
-      />
-      <span class="logo-text">StoryBoard</span>
-    </div>
+    <header id="app-header" role="banner">
+    <div class="logo-area">
+      <img 
+        src="/public/favicon.png" 
+        alt="Logo StoryBoard"
+        width="40" 
+        height="40" 
+      />
+      <span class="logo-text">StoryBoard</span>
+    </div>
 
-    <nav id="app-nav" role="navigation" aria-label="Navigasi utama"></nav>
-  </header>
+    <nav id="app-nav" role="navigation" aria-label="Navigasi utama"></nav>
+  </header>
 
-  <!-- INTRO - tidak pernah dihapus oleh SPA -->
-  <section class="intro-accessible">
-    <h1>Peta Interaktif untuk Cerita Kamu</h1>
-    <h3>
-      Aplikasi ini memungkinkan kamu membuat, melihat, dan menyimpan cerita langsung di atas peta.
-      Semua dirender secara SPA tanpa reload halaman.
-    </h3>
-  </section>
+    <section class="intro-accessible">
+    <h1>Peta Interaktif untuk Cerita Kamu</h1>
+        <h2>
+      Aplikasi ini memungkinkan kamu membuat, melihat, dan menyimpan cerita langsung di atas peta.
+      Semua dirender secara SPA tanpa reload halaman.
+    </h2>
+  </section>
 
-  <!-- AREA YANG DIGANTI SPA -->
-  <main id="main" role="main" tabindex="-1" aria-live="polite"></main>
+    <main id="main" role="main" tabindex="-1" aria-live="polite"></main>
 
-  <!-- Footer -->
-  <footer id="app-footer" role="contentinfo">
-    <p>&copy; 2025 StoryBoard</p>
-  </footer>
+    <footer id="app-footer" role="contentinfo">
+    <p>&copy; 2025 StoryBoard</p>
+  </footer>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script type="module" src="/scripts/main.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script type="module" src="/scripts/main.js"></script>
 </body>
 </html>
