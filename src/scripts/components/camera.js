@@ -1,3 +1,5 @@
+// src/scripts/components/camera.js
+
 export class CameraController {
   constructor(videoEl, canvasEl, captureBtn) {
     this.video = videoEl;

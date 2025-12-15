@@ -1,5 +1,5 @@
 import { el, $ } from "../components/dom.js";
-import { Auth } from  "../components/auth.js";
+import { Auth } from "../components/auth.js";
 
 export class AppShellView {
   init() {

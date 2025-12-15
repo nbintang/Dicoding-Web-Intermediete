@@ -119,8 +119,8 @@ export class AddStoryView {
         if ("Notification" in window && Notification.permission === "granted") {
           new Notification("Story Berhasil Ditambahkan! 🎉", {
             body: desc.substring(0, 100),
-            icon: "/favicon.png",
-            badge: "/favicon.png",
+            icon: "/public/favicon.png",
+            badge: "/public/favicon.png",
             vibrate: [200, 100, 200],
           });
         }

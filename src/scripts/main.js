@@ -197,7 +197,7 @@ async function subscribePushNotification(registration) {
 
 // Register Service Worker
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js")
+  navigator.serviceWorker.register("/scripts/sw.js")
     .then(reg => {
       console.log("[App] Service Worker registered:", reg.scope);
       

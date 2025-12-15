@@ -13,7 +13,7 @@ export class SavedView {
     main.innerHTML = "";
 
     const section = el("section", { class: "saved-section" }, [
-      el("h2", { class: "section-title" }, "⭐ Story Tersimpan"),
+      el("h1", { class: "section-title" }, "⭐ Story Tersimpan"),
       el("p", { class: "helper" }, "Daftar story yang telah kamu simpan"),
       el("div", { id: "status", class: "status", "aria-live": "polite" }),
       el("div", { id: "saved-list", class: "grid modern-grid" }),
@@ -72,7 +72,7 @@ export class SavedView {
             img
         ]),
         el("div", { class: "content" }, [
-          el("h2", { class: "story-title" }, story.name || "Pengguna"),
+          el("h3", { class: "story-title" }, story.name || "Pengguna"),
           el(
             "p",
             { class: "story-desc" },
