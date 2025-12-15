@@ -197,7 +197,12 @@ async function subscribePushNotification(registration) {
 
 // Register Service Worker
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/scripts/sw.js")
+  const swPath = import.meta.env.DEV
+    ? "/public/sw.js"
+    : "/sw.js";
+
+  navigator.serviceWorker
+    .register(swPath)
     .then(reg => {
       console.log("[App] Service Worker registered:", reg.scope);
       

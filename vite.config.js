@@ -1,21 +1,26 @@
-import { defineConfig } from "vite";
-import { resolve } from "path";
+import { defineConfig } from 'vite'; // <--- BARIS INI YANG SEBELUMNYA HILANG
+import path from "path";
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 export default defineConfig({
-  root: resolve(__dirname, "src"),
-  publicDir: resolve(__dirname, "src", "public"),
   build: {
-    outDir: resolve(__dirname, "dist"),
+    outDir: "dist",
     emptyOutDir: true,
+  },
+  server: {
+    port: 5173,
+    open: true,
   },
   resolve: {
     alias: {
-      "@": resolve(__dirname, "src"),
+      "@": path.resolve(__dirname, "./src"), // Saya tambahkan __dirname agar path lebih aman
     },
   },
-  server: {
-    port: 5173, 
-    open: true, 
-  },
+  plugins: [
+    viteStaticCopy({
+      targets: [
+        { src: 'sw-assets.json', dest: '' }
+      ]
+    })
+  ]
 });
-
