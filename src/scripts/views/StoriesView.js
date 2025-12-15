@@ -15,7 +15,7 @@ export class StoriesView {
     main.innerHTML = "";
 
     const section = el("section", { class: "stories-section" }, [
-      el("h1", { class: "section-title" }, "📖 Stories Terbaru"),
+      el("h2", { class: "section-title" }, "📖 Stories Terbaru"),
       el("div", {
         id: "status",
         class: "status modern-status",
@@ -100,7 +100,7 @@ export class StoriesView {
       const card = el("article", { class: "card modern-card", tabindex: "0" }, [
         el("div", { class: "img-wrap" }, [img]),
         el("div", { class: "content" }, [
-          el("h3", { class: "story-title" }, story.name || "Pengguna"),
+          el("h2", { class: "story-title" }, story.name || "Pengguna"),
           el(
             "p",
             { class: "story-desc" },
