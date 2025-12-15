@@ -1,51 +1,61 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>StoryBoard - SPA</title>
-  <meta name="map-tiler-key" content="" />
-  <meta name="description" content="Aplikasi Story SPA" />
-  <meta name="theme-color" content="#6366f1" />
-  <link rel="manifest" href="/assets/manifest-DIU-ZH40.webmanifest" />
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>StoryBoard - SPA</title>
+    <meta name="map-tiler-key" content="" />
+    <meta
+      name="description"
+      content="Aplikasi Story SPA untuk membuat dan berbagi cerita di peta interaktif"
+    />
+    <meta name="theme-color" content="#6366f1" />
 
-  <link rel="icon" href="/assets/favicon-DsTW7L-z.png" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script type="module" crossorigin src="/assets/index-B89yFTzH.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-CodlRNDH.css">
-</head>
+    <!-- PWA Manifest (FIXED PATH) -->
+    <link rel="manifest" href="/assets/manifest-Ct-z8y8h.webmanifest" />
 
-<body>
-    <a class="skip-link" href="#main">Lewati ke konten utama</a>
+    <!-- Apple PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="StoryBoard" />
+    <link rel="apple-touch-icon" href="/assets/favicon-DsTW7L-z.png" />
 
-    <header id="app-header" role="banner">
-    <div class="logo-area">
-      <img 
-        src="/assets/favicon-DsTW7L-z.png" 
-        alt="Logo StoryBoard"
-        width="40" 
-        height="40" 
-      />
-      <span class="logo-text">StoryBoard</span>
-    </div>
+    <!-- Styles & Icons -->
+    <link rel="icon" href="/assets/favicon-DsTW7L-z.png" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script type="module" crossorigin src="/assets/index-B89yFTzH.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CodlRNDH.css">
+  </head>
 
-    <nav id="app-nav" role="navigation" aria-label="Navigasi utama"></nav>
-  </header>
+  <body>
+    <a class="skip-link" href="#main">Lewati ke konten utama</a>
 
-    <section class="intro-accessible">
-    <h1>Peta Interaktif untuk Cerita Kamu</h1>
-        <h2>
-      Aplikasi ini memungkinkan kamu membuat, melihat, dan menyimpan cerita langsung di atas peta.
-      Semua dirender secara SPA tanpa reload halaman.
-    </h2>
-  </section>
+    <header id="app-header" role="banner">
+      <div class="logo-area">
+        <img src="/assets/favicon-DsTW7L-z.png" alt="Logo StoryBoard" width="40" height="40" />
+        <span class="logo-text">StoryBoard</span>
+      </div>
 
-    <main id="main" role="main" tabindex="-1" aria-live="polite"></main>
+      <nav id="app-nav" role="navigation" aria-label="Navigasi utama"></nav>
+    </header>
 
-    <footer id="app-footer" role="contentinfo">
-    <p>&copy; 2025 StoryBoard</p>
-  </footer>
+    <section class="intro-accessible">
+      <h1>Peta Interaktif untuk Cerita Kamu</h1>
+      <h2>
+        Aplikasi ini memungkinkan kamu membuat, melihat, dan menyimpan cerita
+        langsung di atas peta. Semua dirender secara SPA tanpa reload halaman.
+      </h2>
+    </section>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-</body>
+    <main id="main" role="main" tabindex="-1" aria-live="polite"></main>
+
+    <footer id="app-footer" role="contentinfo">
+      <p>&copy; 2025 StoryBoard</p>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  </body>
 </html>

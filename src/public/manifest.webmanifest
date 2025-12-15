@@ -1,49 +1,35 @@
+
 {
-  "name": "StoryBoard - Aplikasi Cerita Interaktif",
+  "name": "StoryBoard - Aplikasi Story Interaktif",
   "short_name": "StoryBoard",
   "description": "Aplikasi untuk membuat, melihat, dan menyimpan cerita di atas peta interaktif",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#1a1a2e",
+  "background_color": "#ffffff",
   "theme_color": "#6366f1",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/public/favicon.png",
-      "sizes": "48x48 72x72 96x96 128x128 144x144 192x192 256x256 384x384 512x512",
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
-  "categories": [
-    "social",
-    "utilities"
-  ],
-  "screenshots": [],
-  "shortcuts": [
+  "categories": ["social", "lifestyle", "utilities"],
+  "screenshots": [
     {
-      "name": "Lihat Cerita",
-      "short_name": "Stories",
-      "description": "Lihat semua cerita di peta",
-      "url": "/#/stories",
-      "icons": [
-        {
-          "src": "/public/favicon.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Tambah Cerita",
-      "short_name": "Add",
-      "description": "Buat cerita baru",
-      "url": "/#/add",
-      "icons": [
-        {
-          "src": "/public/favicon.png",
-          "sizes": "192x192"
-        }
-      ]
+      "src": "/favicon.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
   ]
 }
