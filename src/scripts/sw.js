@@ -3,28 +3,28 @@ const API_CACHE = "story-api-cache-v1";
 const IMAGE_CACHE = "story-image-cache-v1";
 
 const APP_SHELL = [
-  "./",
-  "./index.html",
-  "./styles/styles.css",
-  "./scripts/main.js",
-  "./scripts/router.js",
-  "./scripts/api/model.js",
-  "./scripts/api/db.js",
-  "./scripts/components/auth.js",
-  "./scripts/components/camera.js",
-  "./scripts/components/dom.js",
-  "./scripts/components/map.js",
-  "./scripts/components/view-transition.js",
-  "./scripts/controllers/authController.js",
-  "./scripts/controllers/storyController.js",
-  "./scripts/views/AppShellView.js",
-  "./scripts/views/LoginView.js",
-  "./scripts/views/RegisterView.js",
-  "./scripts/views/StoriesView.js",
-  "./scripts/views/AddStoryView.js",
-  "./scripts/views/SavedView.js",
-  "./scripts/views/NotFoundView.js",
-  "./public/favicon.png",
+  "/",
+  "/index.html",
+  "/styles/styles.css",
+  "/scripts/main.js",
+  "/scripts/router.js",
+  "/scripts/api/model.js",
+  "/scripts/api/db.js",
+  "/scripts/components/auth.js",
+  "/scripts/components/camera.js",
+  "/scripts/components/dom.js",
+  "/scripts/components/map.js",
+  "/scripts/components/view-transition.js",
+  "/scripts/controllers/authController.js",
+  "/scripts/controllers/storyController.js",
+  "/scripts/views/AppShellView.js",
+  "/scripts/views/LoginView.js",
+  "/scripts/views/RegisterView.js",
+  "/scripts/views/StoriesView.js",
+  "/scripts/views/AddStoryView.js",
+  "/scripts/views/SavedView.js",
+  "/scripts/views/NotFoundView.js",
+  "/public/favicon.png",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
 ];
@@ -60,86 +60,99 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   const request = event.request;
+
+  // Hanya handle GET
+  if (request.method !== "GET") return;
+
   const url = new URL(request.url);
 
-  // 1. STRATEGI KHUSUS GAMBAR (Stale-While-Revalidate)
-  // Menangkap semua request gambar ke Dicoding API
+  /* =========================================================
+   * 1. IMAGE STRATEGY (Dicoding API Images)
+   * Stale-While-Revalidate + Offline Safe
+   * ========================================================= */
   if (
     url.origin.includes("dicoding.dev") &&
     (request.destination === "image" ||
-      url.pathname.match(/\.(jpg|jpeg|png|gif|webp)$/i))
+      /\.(jpg|jpeg|png|gif|webp)$/i.test(url.pathname))
   ) {
     event.respondWith(
       caches.open(IMAGE_CACHE).then(async (cache) => {
-        // Cek apakah ada di cache?
-        const cachedResponse = await cache.match(request);
+        const cached = await cache.match(request);
 
-        // Fetch ke network untuk update cache (background)
-        const networkFetch = fetch(request, { mode: "no-cors" }) // Force no-cors untuk gambar opaque
-          .then((networkResponse) => {
-            // Simpan ke cache (baik sukses maupun opaque/status 0)
-            cache.put(request, networkResponse.clone());
-            return networkResponse;
-          })
-          .catch((err) => {
-            // Offline dan fetch gagal
-            console.log("[SW] Image fetch failed (offline):", url.pathname);
-            return null;
-          });
-
-        // Kembalikan cache jika ada, jika tidak tunggu network
-        return cachedResponse || networkFetch;
-      })
-    );
-    return;
-  }
-
-  if (
-    url.origin.includes("dicoding.dev") &&
-    (request.destination === "image" ||
-      url.pathname.match(/\.(jpg|jpeg|png|gif|webp)$/i))
-  ) {
-    event.respondWith(
-      caches.open(IMAGE_CACHE).then(async (cache) => {
-        const cachedResponse = await cache.match(request);
-        // Fetch network dan cache bila berhasil atau opaque
-        const networkFetch = fetch(request)
-          .then((networkResponse) => {
-            if (!networkResponse) return null;
-            // cache only if ok or opaque
-            if (networkResponse.ok || networkResponse.type === "opaque") {
-              cache
-                .put(request, networkResponse.clone())
-                .catch((err) => console.warn("[SW] cache.put failed", err));
+        const networkFetch = fetch(request, { mode: "no-cors" })
+          .then((response) => {
+            if (response) {
+              cache.put(request, response.clone()).catch(() => {});
             }
-            return networkResponse;
+            return response;
           })
-          .catch((err) => {
-            console.log(
-              "[SW] Image fetch failed (offline):",
-              url.pathname,
-              err
-            );
-            return null;
-          });
+          .catch(() => null);
 
-        // Kembalikan cached jika ada, kalau tidak tunggu networkFetch, kalau tidak ada fallback local
-        return (
-          cachedResponse ||
-          networkFetch ||
-          caches.match("/public/fallback-image.png")
-        );
+        // 1️⃣ Pakai cache dulu
+        if (cached) return cached;
+
+        // 2️⃣ Kalau tidak ada cache, coba network
+        const network = await networkFetch;
+        if (network) return network;
+
+        // 3️⃣ Fallback image lokal
+        return caches.match("/public/fallback-image.png");
       })
     );
     return;
   }
-  // 3. STRATEGI DEFAULT (Cache First untuk App Shell)
+
+  /* =========================================================
+   * 2. NAVIGATION REQUEST (SPA + OFFLINE)
+   * INI YANG PALING PENTING UNTUK NETLIFY
+   * ========================================================= */
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          // Simpan halaman ke cache
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put("/index.html", copy);
+          });
+          return response;
+        })
+        .catch(async () => {
+          // 🔥 OFFLINE FALLBACK
+          const cache = await caches.open(CACHE_NAME);
+          const cachedIndex = await cache.match("/index.html");
+          return cachedIndex;
+        })
+    );
+    return;
+  }
+
+  /* =========================================================
+   * 3. APP SHELL & STATIC FILES (Cache First)
+   * ========================================================= */
   event.respondWith(
-    caches.match(request).then((response) => {
-      return response || fetch(request);
+    caches.match(request).then((cached) => {
+      if (cached) return cached;
+
+      return fetch(request)
+        .then((response) => {
+          // Simpan file statis ke cache
+          if (response && response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, copy);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Jika offline & tidak ada cache → biarkan gagal (bukan navigation)
+          return;
+        });
     })
   );
 });
+
 // Push Notification Handler (Tetap sama)
 self.addEventListener("push", (event) => {
   let notificationData = {
