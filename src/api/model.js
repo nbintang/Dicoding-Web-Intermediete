@@ -1,7 +1,6 @@
-// src/scripts/api/model.js
+
 
 import { storyDB } from "./db.js";
-
 const BASE_URL = "https://story-api.dicoding.dev/v1";
 
 export class StoryModel {
