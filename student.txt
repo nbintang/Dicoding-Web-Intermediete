@@ -1,9 +1,12 @@
 deployment: https://story-boards.netlify.app
 email: quantumz4gaming@gmail.com
 password: Password123
+
 penggunaan:
 - buka terminal pada project lewat IDE
-- ketik 'npm install'
-- setelah itu, ketik 'npm run dev'
+- ketik 
+npm install
+- setelah itu
+npm run dev
 
 semangat kakak reviewer!

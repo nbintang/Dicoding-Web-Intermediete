@@ -1,7 +1,7 @@
 // IndexedDB Helper untuk Story Management
 // Menyediakan CRUD operations untuk offline storage
 
-import { fetchImageAsBlob } from "../helper/blobToUrl";
+import { fetchImageAsBlob } from "../helper/fetchImageAsBlob";
 
 const DB_NAME = "StoryDB";
 const DB_VERSION = 4; // ✅ Bump version untuk migration
